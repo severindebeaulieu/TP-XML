@@ -6,9 +6,13 @@ include_once('sources/Sax4PHP.php');
 class PaysUnPeuAsie extends DefaultHandler {
 
   private $jeSuisDansPays = false;
-  private $nomPays = '';
   private $jeSuisDansNomPays = false;
-  private $idCapital = '';
+  private $jeSuisDansNomCapitale =false;
+  private $unIndien = false; //dans la ville
+  private $nomPays = '';
+  private $capitale = '';
+  private $proportionAsie = 0;
+  private $proportionAutres = 0;
 
   //Démarrage du document XML
   function startDocument() {
@@ -25,26 +29,23 @@ class PaysUnPeuAsie extends DefaultHandler {
   //A chaque balise ouvrante rencontrée
   function startElement($nom, $att) {
     //On regarde le nom de la balise
-    switch $nom {
+    switch ($nom) {
     
       //Si on ouvre une balise country
       case 'country':
         //On indique qu'on se trouve dans un pays
         $this->jeSuisDansPays = true;
-        
-        //On stock l'id de la capitale
-        if ($att['capital']) {
-          $this->idCapital = $att['capital'];
-        } else {
-          $this->idCapital = '';
-        }
         break;
         
       //Si on ouvre une balise name
       case 'name':
-        if ($this->jeSuisDansPays === true) {
+        if ($this->jeSuisDansPays === true && $this->jeSuisDansNomPays === false) {
           $this->jeSuisDansNomPays = true;
+        } else if ($this->unIndien === true && $this->jeSuisDansNomCapitale === false) {
+          $this->jeSuisDansNomCapitale = true;
         }
+        
+        
         break;
         
       //Si on ouvre une balise encompassed
@@ -56,8 +57,13 @@ class PaysUnPeuAsie extends DefaultHandler {
         }
         break;
       
-      //Si on ouvre une balise   
-      case '':
+      //Si on ouvre une balise city
+      case 'city':
+        //On regarde si c'est la capitale du pays
+        if(isset($att['is_country_cap']) && $att['is_country_cap'] === 'yes') {
+          $this->unIndien = true;
+        }
+      
         
       default:
         break;
@@ -66,18 +72,20 @@ class PaysUnPeuAsie extends DefaultHandler {
   
   //A chaque balise fermante rencontrée
   function endElement($nom) {
-    switch $nom {
-      case 'country':
-        
-        break;
-      default:
-        break;
+    if ($nom === 'country') {
+      $this->jeSuisDansPays = false;
+      $this->jeSuisDansNomPays = false;
+      $this->printPays();
     }
   }
   
   function characters($data) {
-    if ($this->jeSuisDansNomPays === true) {
+    if ($this->jeSuisDansNomCapitale === false && $this->jeSuisDansNomPays === true) {
       $this->nomPays = $data;
+    } else if ($this->jeSuisDansNomCapitale === true) {
+      $this->capitale = $data;
+      $this->unIndien = false;
+      $this->jeSuisDansNomCapitale = false;
     }
   }
   
