@@ -1,9 +1,9 @@
 <?php 
 
 header('Content-type: text/xml');
-include_once('sources/Sax4PHP.php');
+include_once('Sax4PHP.php');
 
-class PaysUnPeuAsie extends DefaultHandler {
+class MySaxHandler extends DefaultHandler {
 
   function startElement($name, $att) {echo "<start name='$name'/>\n";}
   function endElement($name) {echo "<end name='$name'/>\n";} 
@@ -20,6 +20,4 @@ try {
 	echo "\n",$e;
 }catch(Exception $e) {
 	echo "Default exception >>", $e;
-}
-
-?>
+}?>
