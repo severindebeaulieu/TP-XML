@@ -5,10 +5,12 @@ include_once('sources/Sax4PHP.php');
 
 class PaysUnPeuAsie extends DefaultHandler {
 
-  private $jeSuisDansPays = false;
-  private $jeSuisDansNomPays = false;
-  private $jeSuisDansNomCapitale =false;
-  private $unIndien = false; //dans la ville
+  private $paysEnAsieMaisPasCompletement_PasACentPourcents = false;
+  private $dansCountryAsie = false;
+  private $dansCountry = false;
+  private $dansNameCountry = false;
+  private $dansCity = false;
+  private $dansNameCity = false;
   private $nomPays = '';
   private $capitale = '';
   private $proportionAsie = 0;
@@ -33,35 +35,40 @@ class PaysUnPeuAsie extends DefaultHandler {
     
       //Si on ouvre une balise country
       case 'country':
-        //On indique qu'on se trouve dans un pays
-        $this->jeSuisDansPays = true;
+        $this->dansCountryAsie = true;
+        $this->dansCountry = true;
         break;
         
       //Si on ouvre une balise name
       case 'name':
-        if ($this->jeSuisDansPays === true && $this->jeSuisDansNomPays === false) {
-          $this->jeSuisDansNomPays = true;
-        } else if ($this->unIndien === true && $this->jeSuisDansNomCapitale === false) {
-          $this->jeSuisDansNomCapitale = true;
+        if ($this->dansCountry === true && $this->dansNameCountry === false) {
+          $this->dansNameCountry = true;
+        } else if ($this->dansCity === true && $this->dansNameCity === false) {
+          $this->dansNameCity = true;
         }
-        
         
         break;
         
       //Si on ouvre une balise encompassed
       case 'encompassed':
         //Si le pays appartient au continent Asie mais pas à 100%
-        if ($att['continent'] === 'asia' && $att['percentage'] > 0 && $att['percentage'] > 100) {
+        if ($att['continent'] === 'asia' && $att['percentage'] > 0 && $att['percentage'] < 100) {
           $this->proportionAsie = $att['percentage'];
           $this->proportionAutres = 100 - $this->proportionAsie;
+          $this->dansCountryAsie = false;
+          $this->paysEnAsieMaisPasCompletement_PasACentPourcents = true;
+        } else if ($this->dansCountryAsie === true ) {
+          $this->proportionAsie = 0;
+          $this->proportionAutres = 100;
         }
         break;
       
       //Si on ouvre une balise city
       case 'city':
+         
         //On regarde si c'est la capitale du pays
         if(isset($att['is_country_cap']) && $att['is_country_cap'] === 'yes') {
-          $this->unIndien = true;
+          $this->dansCity = true;
         }
       
         
@@ -72,20 +79,21 @@ class PaysUnPeuAsie extends DefaultHandler {
   
   //A chaque balise fermante rencontrée
   function endElement($nom) {
-    if ($nom === 'country') {
-      $this->jeSuisDansPays = false;
-      $this->jeSuisDansNomPays = false;
+    if ($nom === 'country' && $this->paysEnAsieMaisPasCompletement_PasACentPourcents === true) {
       $this->printPays();
+      $this->paysEnAsieMaisPasCompletement_PasACentPourcents = false;
     }
   }
   
   function characters($data) {
-    if ($this->jeSuisDansNomCapitale === false && $this->jeSuisDansNomPays === true) {
+    if ($this->dansNameCountry === true) {
       $this->nomPays = $data;
-    } else if ($this->jeSuisDansNomCapitale === true) {
+      $this->dansCountry = false;
+      $this->dansNameCountry = false;
+    } else if ($this->dansNameCity === true) {
       $this->capitale = $data;
-      $this->unIndien = false;
-      $this->jeSuisDansNomCapitale = false;
+      $this->dansCity = false;
+      $this->dansNameCity = false;
     }
   }
   
