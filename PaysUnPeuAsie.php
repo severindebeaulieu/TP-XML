@@ -9,7 +9,7 @@ class PaysUnPeuAsie extends DefaultHandler {
   private $dansCountryAsie = false;
   private $dansCountry = false;
   private $dansNameCountry = false;
-  private $dansCity = false;
+  private $unIndien = false; // dans la ville...
   private $dansNameCity = false;
   private $nomPays = '';
   private $capitale = '';
@@ -43,7 +43,7 @@ class PaysUnPeuAsie extends DefaultHandler {
       case 'name':
         if ($this->dansCountry === true && $this->dansNameCountry === false) {
           $this->dansNameCountry = true;
-        } else if ($this->dansCity === true && $this->dansNameCity === false) {
+        } else if ($this->unIndien === true && $this->dansNameCity === false) {
           $this->dansNameCity = true;
         }
         
@@ -68,7 +68,7 @@ class PaysUnPeuAsie extends DefaultHandler {
          
         //On regarde si c'est la capitale du pays
         if(isset($att['is_country_cap']) && $att['is_country_cap'] === 'yes') {
-          $this->dansCity = true;
+          $this->unIndien = true;
         }
       
         
@@ -92,7 +92,7 @@ class PaysUnPeuAsie extends DefaultHandler {
       $this->dansNameCountry = false;
     } else if ($this->dansNameCity === true) {
       $this->capitale = $data;
-      $this->dansCity = false;
+      $this->unIndien = false;
       $this->dansNameCity = false;
     }
   }
