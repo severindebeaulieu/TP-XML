@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<liste-pays>
+  <pays nom="Russia" capitale="Moscow" proportion-asie="80" proportion-autres="20"/>
+  <pays nom="Turkey" capitale="Ankara" proportion-asie="95" proportion-autres="5"/>
+  <pays nom="Egypt" capitale="Cairo" proportion-asie="10" proportion-autres="90"/>
+</liste-pays>

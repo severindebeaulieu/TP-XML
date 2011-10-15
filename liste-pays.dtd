@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!ELEMENT liste-pays (pays)*>
+<!ELEMENT pays EMPTY>
+<!ATTLIST pays 
+  nom CDATA #REQUIRED
+  capitale CDATA #REQUIRED
+  proportion-asie CDATA #REQUIRED
+  proportion-autres CDATA #REQUIRED>

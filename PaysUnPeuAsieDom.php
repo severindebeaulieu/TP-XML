@@ -1,0 +1,78 @@
+<?php
+  $dom = new DomDocument();
+  $dom->load('PackMondial/mondial.xml');
+  
+  $domFinal = new DomDocument('1.0', 'UTF-8');
+  
+  //Pour avoir un XML formaté
+  $domFinal->formatOutput = true;
+
+  $nomPays = '';
+  $capitale = '';
+  $proportionAsie = 0;
+  $proportionAutres = 0;
+  
+  //On ecrit l'entete
+  $domListePays = $domFinal->createElement("liste-pays");
+  
+  //On récupère tous les pays
+  $listePays = $dom->getElementsByTagName('country');
+  
+  //On traite chaque pays
+  foreach($listePays as $pays) {
+  
+    //On regarde pour chaque pays ses continents
+    $encompassedList = $pays->getElementsByTagName('encompassed');
+    
+    foreach($encompassedList as $encompassed) {
+      
+      if ($encompassed->hasAttribute('continent') && $encompassed->hasAttribute('percentage')) {
+      
+        //On stock le continent et le pourcentage
+        $continent = $encompassed->getAttribute('continent');
+        $percentage = $encompassed->getAttribute('percentage');
+        
+        //On regarde si le continent est l'asie et si le pourcentage est entre 0 et 100 (pas complètement en Asie)
+        if ($continent === 'asia' && $percentage > 0 && $percentage < 100) {
+        
+          //On retient les pourcentages pour la génération du XML
+          $proportionAsie = $percentage;
+          $proportionAutres = 100 - $percentage;
+          
+          //On retient le nom du pays
+          $nomPays = $pays->getElementsByTagName('name')->item(0)->nodeValue;
+          
+          //On regarde les villes pour déterminer la capitale
+          $cityList = $pays->getElementsByTagName('city');
+          
+          //On regarde quelle ville est la capitale du pays
+          foreach($cityList as $city) {
+            if ($city->hasAttribute('is_country_cap') && $city->getAttribute('is_country_cap') === 'yes') {
+            
+              $capitale = $city->getElementsByTagName('name')->item(0)->nodeValue;
+              
+              //On ajoute le pays au domDocument
+              $domPays = $domFinal->createElement('pays');
+              $domPays->setAttribute('nom', $nomPays);
+              $domPays->setAttribute('capitale', $capitale);
+              $domPays->setAttribute('proportion-asie', $proportionAsie);
+              $domPays->setAttribute('proportion-autres', $proportionAutres);
+              $domListePays->appendChild($domPays);
+                 
+            }
+          }           
+        }
+      }
+    }
+  }
+  
+  $domFinal->appendChild($domListePays);
+  
+  //On exporte le xml
+  $domFinal->save('sortie/liste-pays.xml');
+  
+  //On l'affiche
+  echo $domFinal->saveXML();
+  
+
+?>
