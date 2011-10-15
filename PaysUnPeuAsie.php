@@ -19,7 +19,7 @@ class PaysUnPeuAsie extends DefaultHandler {
   //Démarrage du document XML
   function startDocument() {
     echo '<?xml version="1.0" encoding="utf-8"?>';
-    echo '<!DOCTYPE mondial SYSTEM "liste-pays.dtd">';
+    echo '<!DOCTYPE liste-pays SYSTEM "liste-pays.dtd">';
     echo '<liste-pays>';
   } 
   

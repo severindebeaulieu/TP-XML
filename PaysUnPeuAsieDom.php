@@ -1,12 +1,25 @@
 <?php
+
+  //On charge le fichier mondial.xml
   $dom = new DomDocument();
   $dom->load('PackMondial/mondial.xml');
   
-  $domFinal = new DomDocument('1.0', 'UTF-8');
+  // Création d'une instance de la classe DOMImplementation pour créer une instance de DomDocumentType (dtd)
+  $imp = new DOMImplementation;
+  
+  // Création d'une instance DOMDocumentType (dtd)
+  $dtd = $imp->createDocumentType('liste-pays', '', 'liste-pays.dtd');
+  
+  // Création d'une instance DOMDocument qui devra respecter la dtd liste-pays.dtd
+  $domFinal = $imp->createDocument("", "", $dtd);
+  
+  //Encodage en UTF-8
+  $domFinal->encoding = 'UTF-8';
   
   //Pour avoir un XML formaté
   $domFinal->formatOutput = true;
 
+  //Définition des variables pour un pays
   $nomPays = '';
   $capitale = '';
   $proportionAsie = 0;
@@ -66,7 +79,11 @@
     }
   }
   
+  //On met la racine dans le domDocument
   $domFinal->appendChild($domListePays);
+  
+  //On valide avec la dtd
+  $domFinal->validate();
   
   //On exporte le xml
   $domFinal->save('sortie/liste-pays.xml');
