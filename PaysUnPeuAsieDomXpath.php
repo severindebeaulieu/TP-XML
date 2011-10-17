@@ -1,11 +1,10 @@
 <?php
 
   //On charge le fichier mondial.xml
-  $dom = new DomDocument();
-  $dom->load('PackMondial/mondial.xml');
+  $xml = simplexml_load_file("PackMondial/mondial.xml");
   
   // Création d'une instance de la classe DOMImplementation pour créer une instance de DomDocumentType (dtd)
-  $imp = new DOMImplementation();
+  $imp = new DOMImplementation;
   
   // Création d'une instance DOMDocumentType (dtd)
   $dtd = $imp->createDocumentType('liste-pays', '', 'liste-pays.dtd');
@@ -25,35 +24,36 @@
   $proportionAsie = 0;
   $proportionAutres = 0;
   
-  //On ecrit la racine
+  //On ecrit l'entete
   $domListePays = $domFinal->createElement("liste-pays");
   
   //On récupère tous les pays
-  $listePays = $dom->getElementsByTagName('country');
+  $listePays = $xml->xpath("//country");
   
   //On traite chaque pays
   foreach($listePays as $pays) {
   
     //On regarde pour chaque pays ses continents
-    $encompassedList = $pays->getElementsByTagName('encompassed');
+    $encompassedList = $pays->xpath('//encompassed');
     
     foreach($encompassedList as $encompassed) {
       
-      if ($encompassed->hasAttribute('continent') && $encompassed->hasAttribute('percentage')) {
-      
+      if (isset($encompassed['continent']) && isset($encompassed['percentage'])) {
+
         //On stock le continent et le pourcentage
-        $continent = $encompassed->getAttribute('continent');
-        $percentage = $encompassed->getAttribute('percentage');
+        $continent = $encompassed['continent'];
+        $percentage = $encompassed['percentage'];
         
         //On regarde si le continent est l'asie et si le pourcentage est entre 0 et 100 (pas complètement en Asie)
-        if ($continent === 'asia' && $percentage > 0 && $percentage < 100) {
-        
+        if ($continent == 'asia' && $percentage > 0 && $percentage < 100) {
+
           //On retient les pourcentages pour la génération du XML
           $proportionAsie = $percentage;
           $proportionAutres = 100 - $percentage;
           
           //On retient le nom du pays
-          $nomPays = $pays->getElementsByTagName('name')->item(0)->nodeValue;
+          $nomPays = $pays->xpath('//name');
+          echo $nomPays[0];
           
           //On regarde les villes pour déterminer la capitale
           $cityList = $pays->getElementsByTagName('city');
@@ -86,7 +86,7 @@
   $domFinal->validate();
   
   //On exporte le xml
-  $domFinal->save('sortie/liste-pays-dom.xml');
+  $domFinal->save('sortie/liste-pays.xml');
   
   //On l'affiche
   echo $domFinal->saveXML();

@@ -15,17 +15,48 @@ class PaysUnPeuAsie extends DefaultHandler {
   private $capitale = '';
   private $proportionAsie = 0;
   private $proportionAutres = 0;
+  private $imp;
+  private $dtd;
+  private $domFinal;
+  
+  // Entête
+  private $domListePays;
 
   //Démarrage du document XML
   function startDocument() {
-    echo '<?xml version="1.0" encoding="utf-8"?>';
-    echo '<!DOCTYPE liste-pays SYSTEM "liste-pays.dtd">';
-    echo '<liste-pays>';
+  
+    // Création d'une instance de la classe DOMImplementation pour créer une instance de DomDocumentType (dtd)
+    $this->imp = new DOMImplementation();
+    
+    // Création d'une instance DOMDocumentType (dtd)
+    $this->dtd = $this->imp->createDocumentType('liste-pays', '', 'liste-pays.dtd');
+    
+    // Création d'une instance DOMDocument qui devra respecter la dtd liste-pays.dtd
+    $this->domFinal = $this->imp->createDocument("", "", $this->dtd);
+    
+    //Encodage en UTF-8
+    $this->domFinal->encoding = 'UTF-8';
+    
+    //Pour avoir un XML formaté
+    $this->domFinal->formatOutput = true;
+    
+    //On ecrit la racine
+    $this->domListePays = $this->domFinal->createElement("liste-pays");
   } 
   
   //Fin du document XML
   function endDocument() {
-    echo '</liste-pays>';
+    //On met la racine dans le domDocument
+    $this->domFinal->appendChild($this->domListePays);
+    
+    //On valide avec la dtd
+    $this->domFinal->validate();
+    
+    //On exporte le xml
+    $this->domFinal->save('sortie/liste-pays-sax.xml');
+    
+    //On l'affiche
+    echo $this->domFinal->saveXML();
   }
   
   //A chaque balise ouvrante rencontrée
@@ -80,11 +111,12 @@ class PaysUnPeuAsie extends DefaultHandler {
   //A chaque balise fermante rencontrée
   function endElement($nom) {
     if ($nom === 'country' && $this->paysEnAsieMaisPasCompletement_PasACentPourcents === true) {
-      $this->printPays();
+      $this->createPays();
       $this->paysEnAsieMaisPasCompletement_PasACentPourcents = false;
     }
   }
   
+  //Des qu'on rencontre une chaine de caractère
   function characters($data) {
     if ($this->dansNameCountry === true) {
       $this->nomPays = $data;
@@ -97,14 +129,14 @@ class PaysUnPeuAsie extends DefaultHandler {
     }
   }
   
-  function printPays() {
-    $print = '<pays ';
-    $print .= 'nom="'.$this->nomPays.'" ';
-    $print .= 'capitale="'.$this->capitale.'" ';
-    $print .= 'proportion-asie="'.$this->proportionAsie.'" ';
-    $print .= 'proportion-autres="'.($this->proportionAutres).'" ';
-    $print .= '/>';
-    echo $print;
+  //Fonction qui génère un noeud pour un pays (en xml)
+  function createPays() {    
+    $domPays = $this->domFinal->createElement('pays');
+    $domPays->setAttribute('nom', $this->nomPays);
+    $domPays->setAttribute('capitale', $this->capitale);
+    $domPays->setAttribute('proportion-asie', $this->proportionAsie);
+    $domPays->setAttribute('proportion-autres', $this->proportionAutres);
+    $this->domListePays->appendChild($domPays);
   }
 
 
