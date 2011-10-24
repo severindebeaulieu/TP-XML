@@ -2,7 +2,7 @@
 
   //On charge le fichier mondial.xml
   $dom = new DomDocument();
-  $dom->load('PackMondial/mondial.xml');
+  $dom->load('sources/mondial.xml');
   
   // Création d'une instance de la classe DOMImplementation pour créer une instance de DomDocumentType (dtd)
   $imp = new DOMImplementation();

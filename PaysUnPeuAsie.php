@@ -142,7 +142,7 @@ class PaysUnPeuAsie extends DefaultHandler {
 
 }
 
-$xml = file_get_contents('PackMondial/mondial.xml');
+$xml = file_get_contents('sources/mondial.xml');
 $sax = new SaxParser(new PaysUnPeuAsie());
 try {
   $sax->parse($xml);
